@@ -81,8 +81,71 @@ def render_sidebar(project: dict[str, Any]) -> None:
 def render_workstream_tab(workstreams: list[dict[str, Any]]) -> None:
     st.subheader("Workstream Health")
     st.caption("RAG status, owners, and progress per workstream. Data: data/workstreams.yaml")
-    # Filled by Task #7
-    st.info("Workstream Health view — implemented in Task #7.")
+
+    counts = {"green": 0, "amber": 0, "red": 0}
+    for w in workstreams:
+        counts[w["status"]] = counts.get(w["status"], 0) + 1
+
+    cols = st.columns(3)
+    cols[0].metric("Green", counts["green"])
+    cols[1].metric("Amber", counts["amber"])
+    cols[2].metric("Red", counts["red"])
+
+    if counts["red"]:
+        st.error(
+            f"{counts['red']} workstream(s) red — escalate at this week's steering committee."
+        )
+    elif counts["amber"]:
+        st.warning(f"{counts['amber']} workstream(s) amber — watch closely.")
+    else:
+        st.success("All workstreams green.")
+
+    st.markdown("---")
+
+    summary_rows = [
+        {
+            "ID": w["id"],
+            "Workstream": w["name"],
+            "Status": w["status"].upper(),
+            "% Complete": w["percent_complete"],
+            "Ajaia Owner": w["ajaia_owner"],
+            "Hospital Owner": w["hospital_owner"],
+            "Next Milestone": w["next_milestone"],
+        }
+        for w in workstreams
+    ]
+    df = pd.DataFrame(summary_rows)
+    st.dataframe(
+        df,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "% Complete": st.column_config.ProgressColumn(
+                "% Complete",
+                min_value=0,
+                max_value=100,
+                format="%d%%",
+            ),
+        },
+    )
+
+    st.markdown("#### Details")
+    for w in workstreams:
+        header = (
+            f"**{w['id']} — {w['name']}**  "
+            f"{status_badge(w['status'])}  "
+            f"_{w['percent_complete']}% complete_"
+        )
+        with st.expander(w["id"] + " — " + w["name"], expanded=(w["status"] == "red")):
+            st.markdown(header, unsafe_allow_html=True)
+            st.markdown(f"**Objective:** {w['objective']}")
+            o1, o2 = st.columns(2)
+            o1.markdown(f"**Ajaia owner:** {w['ajaia_owner']}")
+            o2.markdown(f"**Hospital owner:** {w['hospital_owner']}")
+            st.progress(w["percent_complete"] / 100.0)
+            st.markdown(f"**Next milestone:** {w['next_milestone']}")
+            if w.get("notes"):
+                st.markdown(f"**Notes:** {w['notes']}")
 
 
 def render_milestones_tab(milestones: list[dict[str, Any]]) -> None:

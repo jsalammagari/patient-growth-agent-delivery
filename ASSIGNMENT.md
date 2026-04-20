@@ -119,3 +119,64 @@ The plan is organized around **gates** — points where work stops until a named
 - **Pilot scope is deliberately narrow** — 2 service lines, 3 sites, limited hours for the first week. This trades breadth for the ability to watch every conversation in week 8 and tune fast. Expansion cadence is a *decision* out of the week-8 review, not a pre-committed rollout.
 - **Kill-switch tested before go-live.** The ability to turn the agent off cleanly is not optional in a patient-facing deployment; making it a W7 gate item ensures it is not discovered missing at 7am on go-live day.
 
+### 3. Dependency and Risk View
+
+Risks are scored **severity × likelihood** (1–5 each → max 25). Anything ≥ 12 gets weekly executive visibility; ≥ 16 gets a named owner on the critical path with a pre-committed mitigation budget.
+
+| # | Risk | Sev | Like | Score | Owner |
+|---|---|---|---|---|---|
+| R1 | HIPAA / PHI handling failure (audit, BAA, logging) | 5 | 3 | **15** | Hospital Privacy Officer |
+| R2 | Epic scheduling integration slips or fails QA | 4 | 4 | **16** | Hospital IT Integration Lead |
+| R3 | Ambiguous routing / scheduling rules across service lines | 4 | 4 | **16** | Hospital VP Patient Access |
+| R4 | Agent response quality — hallucination or unsafe clinical reply | 5 | 3 | **15** | Ajaia QA Lead |
+| R5 | Escalation / fallback gaps (patient stuck, no human takeover) | 5 | 3 | **15** | Ajaia Conversation Designer |
+| R6 | Poor lead data quality in Salesforce | 3 | 4 | **12** | Hospital Marketing Director |
+| R7 | Stakeholder misalignment (clinical vs. marketing vs. IT) | 3 | 4 | **12** | Ajaia Delivery Lead |
+| R8 | Patient consent / TCPA compliance for SMS + voice outreach | 4 | 2 | **8** | Hospital Legal |
+
+#### R1 — HIPAA / PHI handling failure  (15)
+- **Why it matters:** A PHI incident halts the pilot, triggers breach notification, and ends the vendor relationship. No other risk is more expensive.
+- **Monitor:** Weekly PIA checkpoint through W5; automated PHI-access audit log review; vendor SOC 2 / HITRUST attestations on file.
+- **Mitigate:** BAA signed in W1–W2 (critical path); PHI minimization at the integration layer (agent receives only what it needs); audit logging for every PHI read/write; red-team scenarios specifically targeting data exfiltration; privacy officer on Gate 1, 2, and 3 sign-offs.
+
+#### R2 — Epic scheduling integration slips (16)
+- **Why it matters:** Without reliable calendar writes, the agent cannot book — which is the core product promise. This is the most common schedule killer in healthcare AI deployments.
+- **Monitor:** Daily sandbox integration test (synthetic patient, synthetic appointment write + read-back); integration burndown reviewed every Tuesday; escalate to hospital CIO if not live-in-sandbox by end of W3.
+- **Mitigate:** Spike the hardest integration path in W2 (not W4); contract an Epic-certified integration partner for surge capacity; build idempotent scheduling calls with retry + replay; design a "hold + human confirm" fallback so pilot can launch even if autonomous booking is deferred.
+
+#### R3 — Ambiguous routing / scheduling rules (16)
+- **Why it matters:** Every clinic has undocumented rules — which insurance goes where, which provider sees new patients, overbooking policy, telehealth vs. in-person preferences. If the agent guesses, it misroutes patients and frustrates providers.
+- **Monitor:** Rule-book completeness scored weekly in W1–W3 (% of service-line rules documented and validated); conflict log from conversation-design review.
+- **Mitigate:** Dedicated W1–W3 rule-elicitation sessions per service line, each with a named clinic operations SME; encode rules as a testable decision tree, not free-text prompts; every unresolved rule gets an "ask a human" fallback rather than a guess.
+
+#### R4 — Unsafe agent response (hallucination, clinical advice) (15)
+- **Why it matters:** A patient receiving wrong medical guidance from a hospital-branded agent is a clinical safety event. This is the risk that keeps hospital general counsel up at night.
+- **Monitor:** Adversarial prompt test suite run on every conversation-flow change; hallucination rate tracked against a labeled golden set; live conversation sampling (≥ 5% of pilot traffic) in W8.
+- **Mitigate:** Explicit guardrails — the agent refuses clinical advice, diagnosis, medication guidance, and triage; keyword + intent-level classifiers route any clinical question to a nurse line; conservative RAG over a curated KB (no open-web retrieval); week-1 pilot = 100% human review of transcripts.
+
+#### R5 — Escalation / fallback gaps (15)
+- **Why it matters:** A patient stuck in an agent loop at 11pm who needed a human is both a safety risk and a reputational one. Healthcare agents fail loudly here.
+- **Monitor:** Escalation rate tracked per intent; "dead-end" detector (>N turns without resolution) alerts on-call; patient-feedback channel monitored daily during pilot.
+- **Mitigate:** Explicit escalation matrix (when + to whom + in what hours); default-escalate on any clinical or billing question; after-hours voicemail + next-business-day callback baked into flows; "talk to a human" is always a one-turn away option, not buried.
+
+#### R6 — Poor lead data quality (12)
+- **Why it matters:** The agent is only as good as the leads it contacts. Dirty phone numbers, missing consent flags, or duplicated records create wasted outreach and compliance risk.
+- **Monitor:** Data-quality audit in W1 (bounce rate, duplication rate, missing-field rate); ongoing weekly quality score on the lead queue.
+- **Mitigate:** Pre-launch data cleansing sprint in W2–W3; deduplication + phone validation before the agent touches a record; exclusion filters on records missing consent; QBR-level review of data quality trends.
+
+#### R7 — Stakeholder misalignment (12)
+- **Why it matters:** Marketing wants more appointments, clinical wants safety, IT wants stability, finance wants ROI. Without a single decision-making body, each week produces "yes, but…" from a different corner and no decision gets made.
+- **Monitor:** Weekly steering-committee attendance + decision-log completeness; RAID "decisions needed" count trending up = a red flag.
+- **Mitigate:** Single hospital sponsor (VP-level) with decision rights; weekly 30-min steering committee with a hard agenda; every workstream has a named Ajaia + hospital owner pair; decisions documented in the RAID with a deadline.
+
+#### R8 — Patient consent / TCPA compliance (8)
+- **Why it matters:** Automated outreach without documented consent is a regulatory and litigation risk (TCPA, state-level). Lower scored because it's well-understood and has clear legal guardrails — but it is a hard binary.
+- **Monitor:** Consent-flag coverage audited per outbound batch; opt-out processing SLA tracked.
+- **Mitigate:** Outreach only to records with explicit opt-in (or prior treatment relationship, legally reviewed); opt-out honored in real time and synced back to Salesforce; legal review of SMS language before any outbound send.
+
+#### How this risk view is operationalized
+
+- The prototype (Part 3) renders this table live, sorted by score, filterable by category — so the weekly steering committee opens it and sees the red items first.
+- Every risk with score ≥ 12 is reviewed every week; score changes are a talking point in the client status update (Part 4).
+- Mitigations are not suggestions — each has a named owner and a milestone tie-in. "Who and by when" is in the tool.
+

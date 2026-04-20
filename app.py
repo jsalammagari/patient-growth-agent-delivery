@@ -151,8 +151,92 @@ def render_workstream_tab(workstreams: list[dict[str, Any]]) -> None:
 def render_milestones_tab(milestones: list[dict[str, Any]]) -> None:
     st.subheader("Milestones")
     st.caption("8-week milestone plan with gate markers. Data: data/milestones.yaml")
-    # Filled by Task #8
-    st.info("Milestones view — implemented in Task #8.")
+
+    counts: dict[str, int] = {}
+    for m in milestones:
+        counts[m["status"]] = counts.get(m["status"], 0) + 1
+
+    c1, c2, c3, c4, c5, c6 = st.columns(6)
+    c1.metric("Total", len(milestones))
+    c2.metric("Done", counts.get("done", 0))
+    c3.metric("On track", counts.get("on_track", 0))
+    c4.metric("At risk", counts.get("at_risk", 0))
+    c5.metric("Blocked", counts.get("blocked", 0))
+    c6.metric("Not started", counts.get("not_started", 0))
+
+    if counts.get("blocked", 0):
+        blocked = [m for m in milestones if m["status"] == "blocked"]
+        st.error(
+            "🚫 Blocked: "
+            + ", ".join(f"{m['id']} {m['name']}" for m in blocked)
+        )
+    if counts.get("at_risk", 0):
+        at_risk = [m for m in milestones if m["status"] == "at_risk"]
+        st.warning(
+            "⚠ At risk: "
+            + ", ".join(f"{m['id']} {m['name']}" for m in at_risk)
+        )
+
+    st.markdown("#### Gates")
+    gates = [m for m in milestones if m.get("gate")]
+    gate_cols = st.columns(len(gates)) if gates else []
+    for col, g in zip(gate_cols, gates):
+        col.markdown(
+            f"**{g['gate']}** — W{g['week']}  \n"
+            f"{g['name']}  \n"
+            f"Target: {g['target_date']}  \n"
+            f"{milestone_status_badge(g['status'])}",
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("---")
+
+    status_options = ["all", "done", "on_track", "at_risk", "blocked", "not_started"]
+    selected_status = st.selectbox("Filter by status", status_options, index=0)
+    week_options = ["all"] + [f"W{w}" for w in sorted({m["week"] for m in milestones})]
+    selected_week = st.selectbox("Filter by week", week_options, index=0)
+
+    filtered = milestones
+    if selected_status != "all":
+        filtered = [m for m in filtered if m["status"] == selected_status]
+    if selected_week != "all":
+        target_week = int(selected_week.lstrip("W"))
+        filtered = [m for m in filtered if m["week"] == target_week]
+
+    rows = [
+        {
+            "ID": m["id"],
+            "Week": f"W{m['week']}",
+            "Milestone": m["name"],
+            "Gate": m.get("gate") or "",
+            "Target": m["target_date"],
+            "Actual": m.get("actual_date") or "",
+            "Status": m["status"].replace("_", " ").upper(),
+            "Owner": m["owner"],
+            "Sign-off": m.get("sign_off", ""),
+        }
+        for m in filtered
+    ]
+    df = pd.DataFrame(rows)
+
+    def highlight_row(row: pd.Series) -> list[str]:
+        status = row["Status"]
+        if status == "BLOCKED":
+            return ["background-color: #fee2e2"] * len(row)
+        if status == "AT RISK":
+            return ["background-color: #fef3c7"] * len(row)
+        if status == "DONE":
+            return ["background-color: #f0fdf4"] * len(row)
+        return [""] * len(row)
+
+    if df.empty:
+        st.info("No milestones match the selected filters.")
+    else:
+        st.dataframe(
+            df.style.apply(highlight_row, axis=1),
+            use_container_width=True,
+            hide_index=True,
+        )
 
 
 def render_raid_tab(raid: dict[str, Any]) -> None:

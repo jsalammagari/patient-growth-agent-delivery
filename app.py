@@ -203,8 +203,17 @@ def render_milestones_tab(milestones: list[dict[str, Any]]) -> None:
         target_week = int(selected_week.lstrip("W"))
         filtered = [m for m in filtered if m["week"] == target_week]
 
+    status_dot = {
+        "done": "🟢",
+        "on_track": "🟢",
+        "at_risk": "🟡",
+        "blocked": "🔴",
+        "not_started": "⚪",
+    }
+
     rows = [
         {
+            "": status_dot.get(m["status"], "⚪"),
             "ID": m["id"],
             "Week": f"W{m['week']}",
             "Milestone": m["name"],
@@ -219,24 +228,10 @@ def render_milestones_tab(milestones: list[dict[str, Any]]) -> None:
     ]
     df = pd.DataFrame(rows)
 
-    def highlight_row(row: pd.Series) -> list[str]:
-        status = row["Status"]
-        if status == "BLOCKED":
-            return ["background-color: #fee2e2"] * len(row)
-        if status == "AT RISK":
-            return ["background-color: #fef3c7"] * len(row)
-        if status == "DONE":
-            return ["background-color: #f0fdf4"] * len(row)
-        return [""] * len(row)
-
     if df.empty:
         st.info("No milestones match the selected filters.")
     else:
-        st.dataframe(
-            df.style.apply(highlight_row, axis=1),
-            use_container_width=True,
-            hide_index=True,
-        )
+        st.dataframe(df, use_container_width=True, hide_index=True)
 
 
 def render_raid_tab(raid: dict[str, Any]) -> None:
@@ -282,12 +277,12 @@ def render_raid_tab(raid: dict[str, Any]) -> None:
         _render_decisions(decisions)
 
 
-def _score_color(score: int) -> str:
+def _score_dot(score: int) -> str:
     if score >= 16:
-        return "#fee2e2"  # red-tinted
+        return "🔴"
     if score >= 12:
-        return "#fef3c7"  # amber-tinted
-    return "#f0fdf4"      # green-tinted
+        return "🟡"
+    return "🟢"
 
 
 def _render_risks(risks: list[dict[str, Any]]) -> None:
@@ -310,6 +305,7 @@ def _render_risks(risks: list[dict[str, Any]]) -> None:
         score = r["severity"] * r["likelihood"]
         rows.append(
             {
+                "": _score_dot(score),
                 "ID": r["id"],
                 "Risk": r["title"],
                 "Sev": r["severity"],
@@ -325,12 +321,8 @@ def _render_risks(risks: list[dict[str, Any]]) -> None:
     rows.sort(key=lambda x: x["Score"], reverse=True)
     df = pd.DataFrame(rows)
 
-    def highlight(row: pd.Series) -> list[str]:
-        color = _score_color(row["Score"])
-        return [f"background-color: {color}"] * len(row)
-
     st.dataframe(
-        df.style.apply(highlight, axis=1),
+        df,
         use_container_width=True,
         hide_index=True,
         column_config={
@@ -340,8 +332,8 @@ def _render_risks(risks: list[dict[str, Any]]) -> None:
         },
     )
     st.caption(
-        "Scoring rule — ≥16 red (critical path, weekly exec visibility). "
-        "12-15 amber (weekly review). <12 green (monthly review)."
+        "Scoring rule — 🔴 ≥16 (critical path, weekly exec visibility). "
+        "🟡 12-15 (weekly review). 🟢 <12 (monthly review)."
     )
 
 

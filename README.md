@@ -10,7 +10,6 @@ Submission for Ajaia LLC AI Solutions Architect assessment.
 | `ASSIGNMENT.md` | Main deliverable — Parts 1 & 2 (Delivery Operating Model + Technical Readiness Note) |
 | `CLIENT_STATUS_SAMPLE.md` | Part 4 — sample weekly client status update |
 | `AI_WORKFLOW.md` | Part 5 — AI tooling and workflow note |
-| `VIDEO_SCRIPT.md` | Part 6 — talking script for the walkthrough video |
 | `app.py` | Part 3 — Streamlit delivery-ops prototype |
 | `data/` | Seed YAML data driving the prototype (edit these to change the UI) |
 | `requirements.txt` | Python dependencies |

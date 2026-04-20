@@ -245,8 +245,163 @@ def render_raid_tab(raid: dict[str, Any]) -> None:
         "Risks (severity x likelihood), Assumptions, Issues, Decisions. "
         "Data: data/raid.yaml"
     )
-    # Filled by Task #9
-    st.info("RAID dashboard — implemented in Task #9.")
+
+    risks = raid.get("risks", [])
+    assumptions = raid.get("assumptions", [])
+    issues = raid.get("issues", [])
+    decisions = raid.get("decisions", [])
+
+    open_risks = [r for r in risks if r["status"] != "closed"]
+    high_risks = [r for r in open_risks if r["severity"] * r["likelihood"] >= 16]
+    open_issues = [i for i in issues if i["status"] != "closed"]
+    pending_decisions = [d for d in decisions if d["status"] == "pending"]
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Open risks", len(open_risks))
+    c2.metric("High risks (≥16)", len(high_risks))
+    c3.metric("Open issues", len(open_issues))
+    c4.metric("Pending decisions", len(pending_decisions))
+
+    if high_risks:
+        st.error(
+            "High-severity risks demanding this week's attention: "
+            + ", ".join(f"{r['id']} {r['title']}" for r in high_risks)
+        )
+
+    sub_r, sub_a, sub_i, sub_d = st.tabs(
+        ["Risks", "Assumptions", "Issues", "Decisions"]
+    )
+
+    with sub_r:
+        _render_risks(risks)
+    with sub_a:
+        _render_assumptions(assumptions)
+    with sub_i:
+        _render_issues(issues)
+    with sub_d:
+        _render_decisions(decisions)
+
+
+def _score_color(score: int) -> str:
+    if score >= 16:
+        return "#fee2e2"  # red-tinted
+    if score >= 12:
+        return "#fef3c7"  # amber-tinted
+    return "#f0fdf4"      # green-tinted
+
+
+def _render_risks(risks: list[dict[str, Any]]) -> None:
+    if not risks:
+        st.info("No risks logged.")
+        return
+
+    status_filter = st.selectbox(
+        "Filter by status",
+        ["all", "open", "mitigating", "accepted", "closed"],
+        index=0,
+        key="risk_status",
+    )
+    filtered = risks if status_filter == "all" else [
+        r for r in risks if r["status"] == status_filter
+    ]
+
+    rows = []
+    for r in filtered:
+        score = r["severity"] * r["likelihood"]
+        rows.append(
+            {
+                "ID": r["id"],
+                "Risk": r["title"],
+                "Sev": r["severity"],
+                "Like": r["likelihood"],
+                "Score": score,
+                "Status": r["status"].upper(),
+                "Owner": r["owner"],
+                "Workstream": r.get("workstream", ""),
+                "Due": r.get("due_date", ""),
+                "Mitigation": r["mitigation"].strip(),
+            }
+        )
+    rows.sort(key=lambda x: x["Score"], reverse=True)
+    df = pd.DataFrame(rows)
+
+    def highlight(row: pd.Series) -> list[str]:
+        color = _score_color(row["Score"])
+        return [f"background-color: {color}"] * len(row)
+
+    st.dataframe(
+        df.style.apply(highlight, axis=1),
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "Score": st.column_config.NumberColumn(
+                "Score", help="Severity x Likelihood (max 25)", format="%d"
+            ),
+        },
+    )
+    st.caption(
+        "Scoring rule — ≥16 red (critical path, weekly exec visibility). "
+        "12-15 amber (weekly review). <12 green (monthly review)."
+    )
+
+
+def _render_assumptions(assumptions: list[dict[str, Any]]) -> None:
+    if not assumptions:
+        st.info("No assumptions logged.")
+        return
+    df = pd.DataFrame(
+        [
+            {
+                "ID": a["id"],
+                "Assumption": a["title"],
+                "Owner": a["owner"],
+                "Status": a["status"].upper(),
+                "Notes": a.get("notes", ""),
+            }
+            for a in assumptions
+        ]
+    )
+    st.dataframe(df, use_container_width=True, hide_index=True)
+
+
+def _render_issues(issues: list[dict[str, Any]]) -> None:
+    if not issues:
+        st.info("No open issues.")
+        return
+    df = pd.DataFrame(
+        [
+            {
+                "ID": i["id"],
+                "Issue": i["title"],
+                "Owner": i["owner"],
+                "Status": i["status"].upper(),
+                "Raised": i.get("raised_date", ""),
+                "Notes": i.get("notes", ""),
+            }
+            for i in issues
+        ]
+    )
+    st.dataframe(df, use_container_width=True, hide_index=True)
+
+
+def _render_decisions(decisions: list[dict[str, Any]]) -> None:
+    if not decisions:
+        st.info("No decisions pending.")
+        return
+    df = pd.DataFrame(
+        [
+            {
+                "ID": d["id"],
+                "Decision needed": d["title"],
+                "Decision maker": d["decision_maker"],
+                "Needed by": d.get("needed_by", ""),
+                "Status": d["status"].upper(),
+                "Notes": d.get("notes", ""),
+            }
+            for d in decisions
+        ]
+    )
+    st.dataframe(df, use_container_width=True, hide_index=True)
 
 
 def render_status_tab(

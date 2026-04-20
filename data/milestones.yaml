@@ -1,0 +1,218 @@
+# Status values: done | on_track | at_risk | blocked | not_started
+# Dates use the kickoff of 2026-03-30; week N runs Monday-to-Friday.
+milestones:
+  - id: M01
+    week: 1
+    name: Kickoff + discovery launch
+    workstreams: [W1, W4]
+    gate: null
+    target_date: 2026-04-03
+    actual_date: 2026-04-03
+    status: done
+    owner: Ajaia Delivery Lead
+    sign_off: Hospital sponsor
+    notes: Kickoff deck signed; BAA in flight.
+
+  - id: M02
+    week: 1
+    name: Stakeholder map + RACI locked
+    workstreams: [W1, W2, W3, W4, W5, W6]
+    gate: null
+    target_date: 2026-04-03
+    actual_date: 2026-04-03
+    status: done
+    owner: Ajaia Delivery Lead
+    sign_off: Hospital sponsor
+    notes: RACI signed across all 6 workstreams.
+
+  - id: M03
+    week: 2
+    name: Current-state journey mapped
+    workstreams: [W1]
+    gate: null
+    target_date: 2026-04-10
+    actual_date: 2026-04-10
+    status: done
+    owner: VP Patient Access
+    sign_off: Patient access + marketing
+    notes: Journey map validated for both service lines.
+
+  - id: M04
+    week: 2
+    name: BAA + vendor risk assessment complete
+    workstreams: [W4]
+    gate: null
+    target_date: 2026-04-10
+    actual_date: 2026-04-09
+    status: done
+    owner: Privacy Officer
+    sign_off: Privacy Officer
+    notes: BAA signed a day ahead of target.
+
+  - id: M05
+    week: 3
+    name: "Gate 1 — Requirements frozen"
+    workstreams: [W1, W3]
+    gate: "Gate 1"
+    target_date: 2026-04-17
+    actual_date: null
+    status: at_risk
+    owner: Hospital sponsor + Ajaia Delivery Lead
+    sign_off: Hospital sponsor
+    notes: Cardiology routing rules unresolved; slipping to Mon W4.
+
+  - id: M06
+    week: 3
+    name: Integration architecture reviewed
+    workstreams: [W2]
+    gate: null
+    target_date: 2026-04-17
+    actual_date: null
+    status: at_risk
+    owner: Hospital IT Integration Lead
+    sign_off: IT security + integration lead
+    notes: Architecture drafted; review slipped due to Epic cred delay.
+
+  - id: M07
+    week: 4
+    name: Epic sandbox end-to-end test (search + hold + confirm)
+    workstreams: [W2]
+    gate: null
+    target_date: 2026-04-24
+    actual_date: null
+    status: blocked
+    owner: Ajaia Solutions Engineer
+    sign_off: Ajaia SE + IT integration lead
+    notes: Blocked on Epic non-prod credentials (R2).
+
+  - id: M08
+    week: 4
+    name: Conversation flows v1 drafted (3 use cases)
+    workstreams: [W3]
+    gate: null
+    target_date: 2026-04-24
+    actual_date: null
+    status: on_track
+    owner: Ajaia Conversation Designer
+    sign_off: Marketing + clinical SME
+    notes: Inbound-inquiry flow drafted; 2 more in progress.
+
+  - id: M09
+    week: 5
+    name: "Gate 2 — Internal prototype demo"
+    workstreams: [W2, W3]
+    gate: "Gate 2"
+    target_date: 2026-05-01
+    actual_date: null
+    status: at_risk
+    owner: Ajaia Delivery Lead
+    sign_off: Ajaia Delivery Lead
+    notes: At risk if Epic sandbox slips past end of W4.
+
+  - id: M10
+    week: 5
+    name: Privacy Impact Assessment complete
+    workstreams: [W4]
+    gate: null
+    target_date: 2026-05-01
+    actual_date: null
+    status: on_track
+    owner: Privacy Officer
+    sign_off: Privacy Officer
+    notes: PIA draft circulated; legal review Tue W4.
+
+  - id: M11
+    week: 5
+    name: Pilot cohort + success criteria agreed
+    workstreams: [W5, W6]
+    gate: null
+    target_date: 2026-05-01
+    actual_date: null
+    status: on_track
+    owner: Patient Access Director
+    sign_off: Hospital sponsor
+    notes: Short-list drafted; KPI targets in steering review W4.
+
+  - id: M12
+    week: 6
+    name: Functional + integration QA complete
+    workstreams: [W5]
+    gate: null
+    target_date: 2026-05-08
+    actual_date: null
+    status: on_track
+    owner: Ajaia QA Lead
+    sign_off: Ajaia QA Lead
+    notes: Test plan in draft.
+
+  - id: M13
+    week: 6
+    name: Red-team + safety testing complete
+    workstreams: [W4, W5]
+    gate: null
+    target_date: 2026-05-08
+    actual_date: null
+    status: on_track
+    owner: Ajaia QA Lead + Privacy Officer
+    sign_off: Privacy Officer
+    notes: Adversarial prompt suite being assembled.
+
+  - id: M14
+    week: 7
+    name: Ops runbook + pilot-clinic training
+    workstreams: [W6]
+    gate: null
+    target_date: 2026-05-15
+    actual_date: null
+    status: on_track
+    owner: Pilot Clinic Manager
+    sign_off: Patient Access Director
+    notes: Runbook outline drafted.
+
+  - id: M15
+    week: 7
+    name: Monitoring dashboard live
+    workstreams: [W6]
+    gate: null
+    target_date: 2026-05-15
+    actual_date: null
+    status: on_track
+    owner: Ajaia Solutions Engineer
+    sign_off: Ajaia Delivery Lead
+    notes: Wireframes approved; build starts W5.
+
+  - id: M16
+    week: 7
+    name: "Gate 3 — Launch-readiness review"
+    workstreams: [W1, W2, W3, W4, W5, W6]
+    gate: "Gate 3"
+    target_date: 2026-05-15
+    actual_date: null
+    status: on_track
+    owner: Hospital sponsor
+    sign_off: Hospital sponsor + all workstream owners
+    notes: Checklist in prototype (readiness.yaml).
+
+  - id: M17
+    week: 8
+    name: "Pilot go-live (2 service lines, 3 sites, limited hours)"
+    workstreams: [W6]
+    gate: null
+    target_date: 2026-05-22
+    actual_date: null
+    status: on_track
+    owner: Ajaia Delivery Lead + Patient Access Director
+    sign_off: Hospital sponsor
+    notes: Kill-switch test required pre go-live.
+
+  - id: M18
+    week: 8
+    name: Week-1 pilot review + tuning plan
+    workstreams: [W6]
+    gate: null
+    target_date: 2026-05-29
+    actual_date: null
+    status: on_track
+    owner: Steering committee
+    sign_off: Steering committee
+    notes: First 48h traffic 100% human reviewed.

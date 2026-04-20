@@ -1,0 +1,161 @@
+# RAID = Risks, Assumptions, Issues, Decisions
+# Risks: scored severity x likelihood, both 1-5 (max score 25).
+# Status values: open | mitigating | closed | accepted
+
+risks:
+  - id: R1
+    title: HIPAA / PHI handling failure (audit, BAA, logging)
+    severity: 5
+    likelihood: 3
+    owner: Privacy Officer
+    status: mitigating
+    mitigation: >
+      BAA signed W2. PHI minimization at integration layer; audit log for every
+      PHI read/write; red-team scenarios targeting exfiltration; privacy officer
+      on Gates 1, 2, 3.
+    due_date: 2026-05-01
+    workstream: W4
+
+  - id: R2
+    title: Epic scheduling integration slips or fails QA
+    severity: 4
+    likelihood: 4
+    owner: Hospital IT Integration Lead
+    status: open
+    mitigation: >
+      Epic sandbox credentials escalated to hospital CIO Friday W3. Spike in W4
+      with Epic-certified partner on standby. Fallback path: "hold + human
+      confirm" pilot design if autonomous booking defers.
+    due_date: 2026-04-24
+    workstream: W2
+
+  - id: R3
+    title: Ambiguous routing / scheduling rules across service lines
+    severity: 4
+    likelihood: 4
+    owner: VP Patient Access
+    status: mitigating
+    mitigation: >
+      Primary care rules signed. Cardiology rule-elicitation session scheduled
+      Monday W4. Any unresolved rule at Gate 1 defaults to "ask a human."
+    due_date: 2026-04-21
+    workstream: W1
+
+  - id: R4
+    title: Agent response quality — hallucination or unsafe clinical reply
+    severity: 5
+    likelihood: 3
+    owner: Ajaia QA Lead
+    status: open
+    mitigation: >
+      Hard refusals for clinical/diagnostic/medication queries; conservative RAG
+      over curated KB (no open web); adversarial test suite by W5; 100% human
+      review of first pilot week transcripts.
+    due_date: 2026-05-08
+    workstream: W5
+
+  - id: R5
+    title: Escalation / fallback gaps (patient stuck, no human takeover)
+    severity: 5
+    likelihood: 3
+    owner: Ajaia Conversation Designer
+    status: open
+    mitigation: >
+      Explicit escalation matrix by intent and hours. Dead-end detector after N
+      turns. "Talk to a human" always one turn away. After-hours voicemail +
+      next-business-day callback path.
+    due_date: 2026-05-01
+    workstream: W3
+
+  - id: R6
+    title: Poor lead data quality in Salesforce
+    severity: 3
+    likelihood: 4
+    owner: Marketing Director
+    status: mitigating
+    mitigation: >
+      Data-quality audit in W1 completed. Cleansing sprint scheduled W3-W4.
+      Phone validation + dedup before agent outreach; consent-flag filter.
+    due_date: 2026-04-24
+    workstream: W1
+
+  - id: R7
+    title: Stakeholder misalignment (clinical vs. marketing vs. IT)
+    severity: 3
+    likelihood: 4
+    owner: Ajaia Delivery Lead
+    status: mitigating
+    mitigation: >
+      Weekly 30-min steering committee with decision log. Single VP-level
+      sponsor with decision rights. RAID decisions item has a deadline.
+    due_date: ongoing
+    workstream: all
+
+  - id: R8
+    title: Patient consent / TCPA compliance for SMS + voice outreach
+    severity: 4
+    likelihood: 2
+    owner: Hospital Legal
+    status: open
+    mitigation: >
+      Outreach only to explicit opt-in or prior-treatment records. Real-time
+      opt-out honored and synced to Salesforce. Legal review of SMS language
+      before any outbound send.
+    due_date: 2026-05-01
+    workstream: W4
+
+assumptions:
+  - id: A1
+    title: Epic App Orchard integration path is approved by hospital
+    owner: Hospital IT Integration Lead
+    status: open
+    notes: App registration submitted W2; decision expected W4.
+
+  - id: A2
+    title: Pilot cohort will consist of existing opt-in leads only
+    owner: Marketing Director
+    status: open
+    notes: Legal reviewing alternative cohort if volume insufficient.
+
+  - id: A3
+    title: After-hours escalation goes to existing nurse-line service
+    owner: Pilot Clinic Manager
+    status: open
+    notes: Nurse-line capacity confirmed for pilot volume.
+
+issues:
+  - id: I1
+    title: Epic non-prod credentials delayed 5 days
+    owner: Hospital IT Integration Lead
+    status: open
+    raised_date: 2026-04-13
+    notes: Escalated to CIO; expected by EOD Monday W4.
+
+  - id: I2
+    title: Cardiology rule book has 7 unresolved routing questions
+    owner: VP Patient Access
+    status: open
+    raised_date: 2026-04-15
+    notes: Session scheduled with cardiology clinic ops Monday W4.
+
+decisions:
+  - id: D1
+    title: Autonomous booking vs. "hold + human confirm" for pilot
+    decision_maker: Hospital sponsor
+    needed_by: 2026-04-24
+    status: pending
+    notes: Drives integration scope and go-live risk posture.
+
+  - id: D2
+    title: Pilot expansion cadence after W8 review
+    decision_maker: Steering committee
+    needed_by: 2026-05-29
+    status: pending
+    notes: Decide based on pilot-week KPIs and incident count.
+
+  - id: D3
+    title: Approved SMS disclosure language
+    decision_maker: Hospital Legal
+    needed_by: 2026-04-24
+    status: pending
+    notes: Blocking dormant-reactivation flow in W3.

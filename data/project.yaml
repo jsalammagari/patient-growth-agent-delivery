@@ -1,0 +1,15 @@
+# Top-level engagement metadata. Everything else in this directory references these dates.
+engagement:
+  client: Regional Hospital System (3-site pilot, 2 service lines)
+  program: Patient Acquisition & Growth Agent
+  delivery_lead: Ajaia Delivery Lead
+  hospital_sponsor: VP Patient Access
+  kickoff_date: 2026-03-30
+  target_go_live: 2026-05-25
+  status_as_of: 2026-04-17   # end of week 3 — Gate 1 week
+  current_week: 3
+  overall_status: amber       # green | amber | red
+  overall_status_reason: >
+    Discovery and compliance on track. Epic integration sandbox access is late
+    (R2 materializing); routing rules gap for cardiology still open (R3).
+    Gate 1 sign-off expected Monday W4 pending cardiology rule book closure.

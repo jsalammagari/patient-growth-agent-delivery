@@ -1,0 +1,60 @@
+workstreams:
+  - id: W1
+    name: Discovery & Requirements
+    objective: Document current/target patient journey, lock scope, set success metrics.
+    ajaia_owner: Ajaia Delivery Lead
+    hospital_owner: VP Patient Access
+    status: green
+    percent_complete: 85
+    next_milestone: Gate 1 — Requirements frozen (W3)
+    notes: Cardiology routing rules still being validated; primary care closed.
+
+  - id: W2
+    name: Integrations & Scheduling Systems
+    objective: Connect agent to Epic, Salesforce Health Cloud, Twilio via secure APIs.
+    ajaia_owner: Ajaia Solutions Engineer
+    hospital_owner: Hospital IT Integration Lead
+    status: red
+    percent_complete: 20
+    next_milestone: Epic sandbox end-to-end test (W4)
+    notes: Epic non-prod credentials delayed 5 days. App Orchard app registration in review.
+
+  - id: W3
+    name: Conversation Design & Knowledge Setup
+    objective: Design agent flows, KB, tone, and escalation paths for patient safety.
+    ajaia_owner: Ajaia Conversation Designer
+    hospital_owner: Marketing Director
+    status: amber
+    percent_complete: 35
+    next_milestone: Flows v1 for 3 use cases (W4)
+    notes: Inbound-inquiry flow drafted; dormant reactivation flow blocked on consent language.
+
+  - id: W4
+    name: Compliance, Privacy & Security
+    objective: HIPAA-compliant PHI handling, consent, audit, clinical guardrails.
+    ajaia_owner: Ajaia Compliance Lead
+    hospital_owner: Privacy Officer
+    status: green
+    percent_complete: 60
+    next_milestone: Privacy Impact Assessment complete (W5)
+    notes: BAA signed W2. PIA draft circulated; legal review scheduled Tuesday W4.
+
+  - id: W5
+    name: QA, Safety Testing & Pilot Readiness
+    objective: Validate agent across happy-path and adversarial inputs; prove pilot readiness.
+    ajaia_owner: Ajaia QA Lead
+    hospital_owner: Pilot Clinic Manager
+    status: green
+    percent_complete: 10
+    next_milestone: Test plan draft (W5)
+    notes: Not yet active — ramps in W5. Pilot cohort short-list drafted.
+
+  - id: W6
+    name: Rollout & Performance Monitoring
+    objective: Staged pilot-to-system launch with live monitoring and ops hand-off.
+    ajaia_owner: Ajaia Delivery Lead
+    hospital_owner: Patient Access Director
+    status: green
+    percent_complete: 5
+    next_milestone: Monitoring dashboard design (W6)
+    notes: Dashboard wireframes in progress. Ops runbook outline started.

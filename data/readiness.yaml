@@ -1,0 +1,130 @@
+# Launch-readiness checklist for Gate 3 (W7).
+# Status values: not_started | in_progress | complete | n_a
+readiness_criteria:
+  - id: RC01
+    category: Integrations
+    criterion: Epic sandbox end-to-end scheduling test passes (search -> hold -> confirm)
+    owner: Ajaia Solutions Engineer
+    status: not_started
+    workstream: W2
+    evidence: ""
+
+  - id: RC02
+    category: Integrations
+    criterion: Salesforce Health Cloud lead sync bidirectional, verified in sandbox
+    owner: Ajaia Solutions Engineer
+    status: in_progress
+    workstream: W2
+    evidence: Lead -> agent inbound verified; outbound activity log pending.
+
+  - id: RC03
+    category: Integrations
+    criterion: Twilio SMS + voice channels provisioned with compliant sender IDs
+    owner: Ajaia Solutions Engineer
+    status: in_progress
+    workstream: W2
+    evidence: SMS short code in review with carrier; voice number provisioned.
+
+  - id: RC04
+    category: Compliance
+    criterion: Signed BAA on file with agent-platform vendor
+    owner: Privacy Officer
+    status: complete
+    workstream: W4
+    evidence: Executed 2026-04-09.
+
+  - id: RC05
+    category: Compliance
+    criterion: Privacy Impact Assessment signed; residual risks accepted
+    owner: Privacy Officer
+    status: in_progress
+    workstream: W4
+    evidence: Draft circulated; legal review Tue W4.
+
+  - id: RC06
+    category: Compliance
+    criterion: Audit logging captures every PHI read/write by the agent
+    owner: Ajaia Solutions Engineer
+    status: not_started
+    workstream: W4
+    evidence: ""
+
+  - id: RC07
+    category: Compliance
+    criterion: Consent flow (SMS opt-in + voice disclosure) approved by legal
+    owner: Hospital Legal
+    status: not_started
+    workstream: W4
+    evidence: Awaiting decision D3.
+
+  - id: RC08
+    category: Conversation Quality
+    criterion: Agent refuses clinical advice, diagnosis, and medication guidance (tested)
+    owner: Ajaia QA Lead
+    status: not_started
+    workstream: W5
+    evidence: ""
+
+  - id: RC09
+    category: Conversation Quality
+    criterion: Escalation matrix implemented; "talk to a human" always 1 turn away
+    owner: Ajaia Conversation Designer
+    status: in_progress
+    workstream: W3
+    evidence: Matrix drafted; implementation in flow v2.
+
+  - id: RC10
+    category: Conversation Quality
+    criterion: Red-team adversarial suite pass rate >= 95% on labeled set
+    owner: Ajaia QA Lead
+    status: not_started
+    workstream: W5
+    evidence: ""
+
+  - id: RC11
+    category: Operations
+    criterion: Pilot clinic staff trained; on-call rotation named
+    owner: Pilot Clinic Manager
+    status: not_started
+    workstream: W6
+    evidence: ""
+
+  - id: RC12
+    category: Operations
+    criterion: Kill-switch tested end-to-end in non-prod and prod-like env
+    owner: Ajaia Solutions Engineer
+    status: not_started
+    workstream: W6
+    evidence: ""
+
+  - id: RC13
+    category: Operations
+    criterion: Monitoring dashboard live with alert thresholds configured
+    owner: Ajaia Solutions Engineer
+    status: not_started
+    workstream: W6
+    evidence: Wireframes approved; build W5.
+
+  - id: RC14
+    category: Operations
+    criterion: Incident response runbook signed by hospital ops
+    owner: Patient Access Director
+    status: not_started
+    workstream: W6
+    evidence: Outline drafted.
+
+  - id: RC15
+    category: Data Quality
+    criterion: Lead-queue data-quality score >= threshold (dedup, phone validation, consent)
+    owner: Marketing Director
+    status: in_progress
+    workstream: W1
+    evidence: Audit complete; cleansing sprint W3-W4.
+
+  - id: RC16
+    category: Business Readiness
+    criterion: Pilot cohort list + KPI targets signed by sponsor
+    owner: Patient Access Director
+    status: in_progress
+    workstream: W6
+    evidence: Short-list drafted; sponsor review W4.

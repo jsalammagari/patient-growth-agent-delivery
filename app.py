@@ -414,10 +414,164 @@ def render_status_tab(
     st.subheader("Weekly Status Generator")
     st.caption(
         "Compiles a client-ready weekly update from the live data. "
-        "Button below renders markdown you can copy or download."
+        "Regenerate after editing the YAML files. Download the .md to send."
     )
-    # Filled by Task #10
-    st.info("Weekly status generator — implemented in Task #10.")
+
+    if st.button("🔄 Regenerate from latest data"):
+        st.cache_data.clear()
+        st.rerun()
+
+    md = generate_status_markdown(project, workstreams, milestones, raid, readiness)
+
+    status_as_of = project["engagement"]["status_as_of"]
+    filename = f"weekly_status_{status_as_of}.md"
+
+    st.download_button(
+        label="⬇ Download as Markdown",
+        data=md,
+        file_name=filename,
+        mime="text/markdown",
+    )
+
+    st.markdown("---")
+    st.markdown("#### Preview")
+    st.markdown(md)
+
+    with st.expander("View raw markdown (copyable)"):
+        st.code(md, language="markdown")
+
+
+def generate_status_markdown(
+    project: dict[str, Any],
+    workstreams: list[dict[str, Any]],
+    milestones: list[dict[str, Any]],
+    raid: dict[str, Any],
+    readiness: list[dict[str, Any]],
+) -> str:
+    eng = project["engagement"]
+    week = eng["current_week"]
+    as_of = eng["status_as_of"]
+    overall = eng["overall_status"]
+    reason = eng["overall_status_reason"].strip()
+
+    status_label = {"green": "ON TRACK", "amber": "AT RISK", "red": "OFF TRACK"}.get(
+        overall, overall.upper()
+    )
+
+    completed_recent = [
+        m for m in milestones
+        if m["status"] == "done" and m.get("actual_date") and m["week"] in (week, week - 1)
+    ]
+    in_flight_this_week = [m for m in milestones if m["week"] == week and m["status"] != "done"]
+    upcoming_next = [m for m in milestones if m["week"] == week + 1]
+    blocked = [m for m in milestones if m["status"] == "blocked"]
+    at_risk = [m for m in milestones if m["status"] == "at_risk"]
+
+    risks = raid.get("risks", [])
+    top_risks = sorted(
+        [r for r in risks if r["status"] != "closed"],
+        key=lambda r: r["severity"] * r["likelihood"],
+        reverse=True,
+    )[:3]
+    open_issues = [i for i in raid.get("issues", []) if i["status"] != "closed"]
+    pending_decisions = [d for d in raid.get("decisions", []) if d["status"] == "pending"]
+
+    ready_complete = sum(1 for c in readiness if c["status"] == "complete")
+
+    out: list[str] = []
+    out.append(f"# Weekly Status — {eng['program']}")
+    out.append(f"**Client:** {eng['client']}  ")
+    out.append(f"**Week {week} of 8** · Status as of **{as_of}**  ")
+    out.append(f"**Overall: {status_label}**\n")
+    out.append(f"> {reason}\n")
+
+    out.append("## Progress this week")
+    if completed_recent:
+        for m in completed_recent:
+            out.append(
+                f"- ✅ **{m['id']} {m['name']}** — completed {m['actual_date']} "
+                f"(owner: {m['owner']})"
+            )
+    else:
+        out.append("- _No milestones fully closed this week._")
+    if in_flight_this_week:
+        out.append("")
+        out.append("**In flight this week:**")
+        for m in in_flight_this_week:
+            tag = "⚠ AT RISK" if m["status"] == "at_risk" else (
+                "🚫 BLOCKED" if m["status"] == "blocked" else "→ in progress"
+            )
+            out.append(f"- {tag} — **{m['id']} {m['name']}** (target {m['target_date']}, owner: {m['owner']})")
+    out.append("")
+
+    out.append("## Upcoming priorities")
+    if upcoming_next:
+        for m in upcoming_next:
+            gate = f" [**{m['gate']}**]" if m.get("gate") else ""
+            out.append(f"- **{m['id']} {m['name']}**{gate} — target {m['target_date']} (owner: {m['owner']})")
+    else:
+        out.append("- _No milestones scheduled next week._")
+    out.append("")
+
+    out.append("## Workstream snapshot")
+    out.append("| Workstream | Status | % Complete | Next milestone |")
+    out.append("|---|---|---|---|")
+    for w in workstreams:
+        status_mark = {"green": "🟢", "amber": "🟡", "red": "🔴"}.get(w["status"], "⚪")
+        out.append(
+            f"| {w['id']} {w['name']} | {status_mark} {w['status'].upper()} | "
+            f"{w['percent_complete']}% | {w['next_milestone']} |"
+        )
+    out.append("")
+
+    out.append("## Risks and blockers")
+    if blocked:
+        out.append("**Blocked milestones:**")
+        for m in blocked:
+            out.append(f"- 🚫 {m['id']} {m['name']} — owner: {m['owner']}")
+        out.append("")
+    if at_risk:
+        out.append("**At-risk milestones:**")
+        for m in at_risk:
+            out.append(f"- ⚠ {m['id']} {m['name']} — owner: {m['owner']}")
+        out.append("")
+    if top_risks:
+        out.append("**Top risks this week:**")
+        for r in top_risks:
+            score = r["severity"] * r["likelihood"]
+            out.append(
+                f"- **{r['id']} (score {score})** {r['title']} — owner: {r['owner']}. "
+                f"Mitigation: {r['mitigation'].strip().replace(chr(10), ' ')}"
+            )
+        out.append("")
+    if open_issues:
+        out.append("**Open issues:**")
+        for i in open_issues:
+            out.append(f"- {i['id']} {i['title']} — owner: {i['owner']} (raised {i.get('raised_date', 'n/a')})")
+        out.append("")
+
+    out.append("## Decisions needed")
+    if pending_decisions:
+        for d in pending_decisions:
+            out.append(
+                f"- **{d['id']} — {d['title']}** · decision maker: {d['decision_maker']} · "
+                f"needed by: {d.get('needed_by', 'TBD')}"
+            )
+    else:
+        out.append("- _No outstanding decisions._")
+    out.append("")
+
+    out.append("## Launch-readiness posture")
+    out.append(
+        f"- {ready_complete} of {len(readiness)} Gate-3 criteria complete. "
+        f"See the readiness tracker for detail."
+    )
+    out.append("")
+
+    out.append("---")
+    out.append(f"_Generated from live delivery data on {date.today().isoformat()}._")
+
+    return "\n".join(out)
 
 
 def main() -> None:
